@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estudos e Persona 3 Vambora </title>
+    <title>Estudos — Turma Compartilhado</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap"
         rel="stylesheet">
@@ -1002,6 +1002,12 @@
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:rgba(0,170,255,0.3); border-radius:2px; }
 @media(max-width:768px) { .stats-bar{grid-template-columns:1fr 1fr;} .subjects-grid{grid-template-columns:1fr;} .form-row{grid-template-columns:1fr;} main{padding:1rem;} }
+.act-author { font-family:'Share Tech Mono',monospace; font-size:9px; color:rgba(0,200,255,0.5); font-style:italic; }
+.author-input { background:rgba(0,255,136,0.06) !important; border-color:rgba(0,255,136,0.3) !important; color:#00ff88 !important; }
+.author-input:focus { border-color:#00ff88 !important; }
+.online-badge { display:inline-flex; align-items:center; gap:0.4rem; font-family:'Share Tech Mono',monospace; font-size:9px; color:#00ff88; letter-spacing:1px; }
+.online-badge .dot-sm { width:6px; height:6px; border-radius:50%; background:#00ff88; box-shadow:0 0 6px #00ff88; animation:blink 2s infinite; }
+.loading-state { text-align:center; padding:1.5rem; color:var(--blue-cyan); font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:2px; animation:blink 1s infinite; }
 </style>
 </head>
 <body>
@@ -1020,13 +1026,17 @@
         <header>
             <div class="logo-block">
                 <div class="logo-icon">ES</div>
-                <div class="logo-text">Estudos<span>Vou salvar vocês tropa</span></div>
+                <div class="logo-text">Estudos<span>Turma — Compartilhado</span></div>
             </div>
             <nav class="main-nav">
                 <button class="active" onclick="showPage('dashboard')">Dashboard</button>
                 <button onclick="showPage('materias')">Matérias</button>
                 <button onclick="showPage('todas')">Todas as Atividades</button>
             </nav>
+            <div class="db-status">
+                <div class="db-dot" id="dbDot"></div>
+                <span id="dbLabel" style="font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--grey)">CONECTANDO...</span>
+            </div>
         </header>
         <div class="category-bar">
             <span class="cat-label">// FILTRAR POR</span>
@@ -1043,10 +1053,13 @@
             <div id="page-dashboard" class="page-view active">
                 <div class="page-header">
                     <div>
-                        <div class="page-title-sub">// SISTEMA ACADÊMICO</div>
+                        <div class="page-title-sub">// SISTEMA ACADÊMICO COMPARTILHADO</div>
                         <div class="page-title">DASHBOARD</div>
                     </div>
-                    <div class="page-date" id="currentDate"></div>
+                    <div style="margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem;">
+                        <span class="online-badge"><span class="dot-sm"></span><span id="syncLabel">SINCRONIZANDO...</span></span>
+                        <div class="page-date" id="currentDate"></div>
+                    </div>
                 </div>
                 <div class="stats-bar">
                     <div class="stat-card">
@@ -1066,7 +1079,7 @@
                         <div class="stat-label">Canceladas</div>
                     </div>
                 </div>
-                <div id="dashboard-grid" class="subjects-grid"></div>
+                <div id="dashboard-grid" class="subjects-grid"><div class="loading-state">// CARREGANDO ATIVIDADES DA TURMA...</div></div>
             </div>
             <div id="page-materias" class="page-view">
                 <div class="page-header">
@@ -1095,6 +1108,7 @@
                                 <th>Matéria</th>
                                 <th>Tipo</th>
                                 <th>Entrega</th>
+                                <th>Quem adicionou</th>
                                 <th>Resumo</th>
                                 <th>Ações</th>
                             </tr>
@@ -1112,6 +1126,8 @@
             <div class="modal-header"><span class="modal-title">// NOVA ATIVIDADE</span><button class="modal-close"
                     onclick="closeModal('addModal')">&#x2715;</button></div>
             <div class="modal-body">
+                <div class="form-group"><label class="form-label">Seu Nome / Apelido</label><input class="form-input author-input"
+                        id="inp-author" placeholder="Ex: João, Bia, Anônimo..."></div>
                 <div class="form-group"><label class="form-label">Título da Atividade</label><input class="form-input"
                         id="inp-titulo" placeholder="Ex: Trabalho sobre SQL..."></div>
                 <div class="form-row">
@@ -1154,6 +1170,9 @@
                     <div id="resumo-act-mat"
                         style="color:var(--grey);font-family:Share Tech Mono,monospace;font-size:11px;margin-bottom:0.3rem;">
                     </div>
+                </div>
+                <div class="form-group"><label class="form-label">Adicionado por</label>
+                    <div id="resumo-act-author" style="color:#00ff88;font-family:'Share Tech Mono',monospace;font-size:11px;margin-bottom:0.3rem;"></div>
                 </div>
                 <div class="form-group"><label class="form-label">Resumo / Notas</label><textarea class="resumo-input"
                         id="resumo-textarea" placeholder="Adicione suas notas sobre esta atividade..."></textarea></div>
